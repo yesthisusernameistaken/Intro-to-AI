@@ -175,6 +175,7 @@ def followLinev2():
 	sensorLeft = colorSensorLeft.value()
 	sensorRight = colorSensorRight.value()
 	sensorFront = lightSensorFront.value()	
+	print("-------------------------------------------------------------------------------------------")
 	#Print the sensor values to the terminal (mainly for debugging reasons, like a lot of the comments here)
 	print("sensorLeft: ", sensorLeft, " sensorRight: ", sensorRight, "sensorFront", sensorFront)
 
