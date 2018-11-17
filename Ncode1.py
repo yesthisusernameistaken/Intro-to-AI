@@ -9,14 +9,15 @@ import signal
 #Todo list
 #Get it to count lines but not multiple times the same one
 #find a way of setting a list of steps to take (ie turns)
+#Get the Uturn working
 
 #Long term to do
-#Raise sensors 
 #will be getting more analogue values so will need to speed up, slow down motors 
 
 #Done
 #Get it to really stop when it detecs a line ---------------
 #Get the turns to be partialy sensor based
+#Raise sensors 
 
 #Threshold for the sensors, the two color ones and the light
 THRESHOLD_LEFT = 30
@@ -90,11 +91,6 @@ def leftTurnS():
 
     return
 
-def leftTurn():
-	mB.run_to_rel_pos(position_sp=460, speed_sp=900, stop_action="hold")
-	mB.wait_while('running')
-	return
-
 #90 degree turn to the right, uses sensor for final position
 def rightTurnS():
 	#Initial turn to make it most of the way there
@@ -117,12 +113,6 @@ def rightTurnS():
 
     return
 
-
-#90 degree turn to the right
-def rightTurn():
-	mA.run_to_rel_pos(position_sp=460, speed_sp=900, stop_action="hold")
-	#mA.wait_while('running')
-	return
 
 #Full 180 turn
 def uTurn():
