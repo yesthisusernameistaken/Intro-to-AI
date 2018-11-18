@@ -11,6 +11,7 @@ import signal
 #Might get the bot to stop right after the fully crossed a line OR get turns to reset that bit
 #Find a way of setting a list of steps to take (ie turns)
 #When it makes a U-turn, might need to get it to backup but only when doing a 180? Yeah looks like it
+#if it needs to use the ensors when reversing will 
 
 #Long term to do
 #Will be getting more analogue values so will need to speed up, slow down motors 
@@ -36,6 +37,9 @@ BASE_SPEED = 300
 TURN_SPEED = 400
 TURN_SPEED_SENS = 600
 TURN_SPEED_SENS_FINAL = 200
+
+REVERSE_DIST = 100
+
 #----------------------------------------------------------------------------------------------------------------------
 #Initial setup of sensors and motors
 
@@ -131,8 +135,21 @@ def TurnLeftOrRight(LOR):
     #Unfinished code here
     return
 
+def Reverse():
+    #First need to reverse a bit
+    mA.polarity = "inversed"
+    mB.polarity = "inversed"
+    mA.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    mB.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    #Set direction back to normal
+    mA.polarity = "normal"
+    mB.polarity = "normal"
+    return
+
 #180 to the right with sensors for final bit
 def UturnS():
+    #First reverse to clear the can
+    Reverse()
     mA.run_to_rel_pos(position_sp=380, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mB.polarity = "inversed"
     mB.run_to_rel_pos(position_sp=380, speed_sp=TURN_SPEED_SENS, stop_action="hold")
@@ -154,6 +171,7 @@ def UturnS():
             print("Left sensor value: ", sensorLeftT)
 
     return
+
 
 def Stops():
     print('Stop motors')
