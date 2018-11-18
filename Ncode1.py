@@ -9,7 +9,8 @@ import signal
 #Todo list
 #Get it to count lines but not multiple times the same one, code written, need to test
 #Might get the bot to stop right after the fully crossed a line OR get turns to reset that bit
-#find a way of setting a list of steps to take (ie turns)
+#Find a way of setting a list of steps to take (ie turns)
+#When it makes a U-turn, might need to get it to backup but only when doing a 180? Yeah looks like it
 
 #Long term to do
 #Will be getting more analogue values so will need to speed up, slow down motors 
@@ -162,6 +163,7 @@ def Stops():
     return
 #----------------------------------------------------------------------------------------------------------------------	
 
+#Turn left and right to keep the line in the center
 def TurnForLine(sensorRight, sensorLeft):
  if sensorRight < sensorLeft:
      print("Turn right")
@@ -183,6 +185,13 @@ def countLine(sensorFront):
     return
 
 #----------------------------------------------------------------------------------------------------------------------
+#This bit will decide what direction to take
+
+def WhatToDo():
+
+    return
+
+#----------------------------------------------------------------------------------------------------------------------
 #This would be the main bit
 
 def followLinev2():
@@ -192,7 +201,11 @@ def followLinev2():
     sensorFront = lightSensorFront.value()	
     print("-------------------------------------------------------------------------------------------")
     #Print the sensor values to the terminal (for debugging reasons, like a lot of the prints here)
-    print("sensorLeft: ", sensorLeft, " sensorRight: ", sensorRight, "sensorFront", sensorFront)
+    print("Left: ", sensorLeft, "Right: ", sensorRight, "Front: ", sensorFront)
+
+
+    #Could have a bit here that counts the current number of intersections and makes a move based on that
+    #WhatToDo()
 
     #Check the front sensor and stop/count it, if a line is detected
     if sensorFront < THRESHOLD_FRONT:
@@ -206,7 +219,7 @@ def followLinev2():
         #Get the difference between the two sensors
         sensorDif = sensorLeft-sensorRight
         sensorDif = abs(sensorDif)
-        print("Sensor difference = ", sensorDif)
+        print("Sensor difference: ", sensorDif)
 
         if sensorDif < THRESHOLD_DIF:
             print("Go ahead, difference is sensor is below threshold")
