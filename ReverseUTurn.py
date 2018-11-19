@@ -9,7 +9,7 @@ import signal
 #Threshold for the sensors, the two color ones and the light
 THRESHOLD_LEFT = 30
 THRESHOLD_RIGHT = 30
-THRESHOLD_FRONT = 350
+THRESHOLD_FRONT = 450
 THRESHOLD_DIF = 20
 
 
@@ -63,6 +63,8 @@ def UturnSR():
     mB.polarity = "inversed"
     mA.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mB.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    mA.wait_while('running')
+    mB.wait_while('running')
     #Set direction back to normal
     mA.polarity = "normal"
     mB.polarity = "normal"

@@ -7,28 +7,33 @@ import signal
 #This code follows a line and will count the intersections it passes (In theory, not really tested yet). 
 
 #Todo list
-#Get it to count lines but not multiple times the same one, code written, need to test
-#Might get the bot to stop right after the fully crossed a line OR get turns to reset that bit
 #Find a way of setting a list of steps to take (ie turns)
-#When it makes a U-turn, might need to get it to backup but only when doing a 180? Yeah looks like it
-#if it needs to use the ensors when reversing will 
+#If it needs to use the ensors when reversing will 
 
 #Long term to do
 #Will be getting more analogue values so will need to speed up, slow down motors 
 #Sheild the sensors from external light 
+#Ues the dif between  current and previous reading
+
 
 #Done
 #Get it to really stop when it detecs a line ---------------
 #Get the turns to be partialy sensor based
 #Raise sensors (will need to sheild them but the values seem more consisten)
 #Get the Uturn working
+#Get it to count lines but not multiple times the same one, code written, need to test
+#Might get the bot to stop right after the fully crossed a line OR get turns to reset that bit
+#When it makes a U-turn, might need to get it to backup but only when doing a 180? Yeah looks like it
+
 
 #Threshold for the sensors, the two color ones and the light
 THRESHOLD_LEFT = 30
 THRESHOLD_RIGHT = 30
-THRESHOLD_FRONT = 350
+THRESHOLD_FRONT = 400
 THRESHOLD_DIF = 20
 
+#global intersections
+#global holdBit
 intersections = 0
 holdBit = 0
 
@@ -195,8 +200,8 @@ def TurnForLine(sensorRight, sensorLeft):
 
 #This bit attempts to count the black intersections
 def countLine(sensorFront):
-    global intersections
     global holdBit
+    global intersections
     if holdBit == 0:
         intersections = intersections+1
         holdBit = holdBit+1
@@ -213,6 +218,7 @@ def WhatToDo():
 #This would be the main bit
 
 def followLinev2():
+    global holdBit
     #Read the sensor value and store it
     sensorLeft = colorSensorLeft.value()
     sensorRight = colorSensorRight.value()
@@ -220,7 +226,7 @@ def followLinev2():
     print("-------------------------------------------------------------------------------------------")
     #Print the sensor values to the terminal (for debugging reasons, like a lot of the prints here)
     print("Left: ", sensorLeft, "Right: ", sensorRight, "Front: ", sensorFront)
-
+    print("Number of intersections counted = ", intersections)
 
     #Could have a bit here that counts the current number of intersections and makes a move based on that
     #WhatToDo()
@@ -230,7 +236,6 @@ def followLinev2():
         #Black line detected by front sensor
         #Stops()
         countLine(sensorFront)
-        print("Number of intersections counted = ", intersections)
     else:
         #Front sensor doesn't see a black line
         holdBit = 0
