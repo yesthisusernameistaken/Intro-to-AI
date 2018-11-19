@@ -4,26 +4,25 @@ import ev3dev.ev3 as ev3
 from time import sleep
 import signal
 
-#This code follows a line and will count the intersections it passes (In theory, not really tested yet). 
+#This code follows a line and will count the intersections it passes 
 
 #Todo list
 #Find a way of setting a list of steps to take (ie turns)
 #If it needs to use the ensors when reversing will 
 
 #Long term to do
-#Will be getting more analogue values so will need to speed up, slow down motors 
-#Sheild the sensors from external light 
 #Ues the dif between  current and previous reading
-
+#Will be getting more analogue values so will need to speed up, slow down motors at smaller increments
 
 #Done
-#Get it to really stop when it detecs a line ---------------
+#Get it to really stop when it detecs a line
 #Get the turns to be partialy sensor based
 #Raise sensors (will need to sheild them but the values seem more consisten)
 #Get the Uturn working
 #Get it to count lines but not multiple times the same one, code written, need to test
 #Might get the bot to stop right after the fully crossed a line OR get turns to reset that bit
 #When it makes a U-turn, might need to get it to backup but only when doing a 180? Yeah looks like it
+#Sheild the sensors from external light 
 
 
 #Threshold for the sensors, the two color ones and the light
@@ -32,12 +31,10 @@ THRESHOLD_RIGHT = 30
 THRESHOLD_FRONT = 400
 THRESHOLD_DIF = 20
 
-#global intersections
-#global holdBit
 intersections = 0
 holdBit = 0
 
-#Speeds the motor will use
+#Speeds the motors will use
 BASE_SPEED = 300
 TURN_SPEED = 400
 TURN_SPEED_SENS = 600
@@ -78,7 +75,7 @@ signal.signal(signal.SIGINT, signal_handler)
 print('Press Ctrl+C to exit')
 
 #----------------------------------------------------------------------------------------------------------------------
-#Code concerning movement
+#Code concerning movement actions
 
 #90 degree turn to the left, uses sensor for final position
 def leftTurnS():
@@ -135,8 +132,8 @@ def TurnLeftOrRight(LOR):
         #Right turn
         mA.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
         mA.wait_while('running')
-    sensorLeftT = colorSensorLeft.value()
-    sensorRightT = colorSensorRight.value()
+    #sensorLeftT = colorSensorLeft.value()
+    #sensorRightT = colorSensorRight.value()
     #Unfinished code here
     return
 
@@ -160,8 +157,10 @@ def UturnS():
     mB.run_to_rel_pos(position_sp=380, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mA.wait_while('running')
     mB.wait_while('running')
+    #Set the motor back to normal, not sure if needed but to be on the safe side
+    mB.polarity = "normal"
+
     sensorLeftT = colorSensorLeft.value()
-    sensorRightT = colorSensorRight.value()
     
     if sensorLeftT < THRESHOLD_LEFT:
         print('Line seen right from the start')
@@ -182,7 +181,6 @@ def Stops():
     print('Stop motors')
     mA.stop(stop_action="hold")
     mB.stop(stop_action="hold")
-    #followLinev2()
     return
 #----------------------------------------------------------------------------------------------------------------------	
 
@@ -245,11 +243,11 @@ def followLinev2():
         print("Sensor difference: ", sensorDif)
 
         if sensorDif < THRESHOLD_DIF:
-            print("Go ahead, difference is sensor is below threshold")
+            print("Go ahead, difference is sensors is below threshold")
             mA.run_forever(speed_sp=BASE_SPEED)
             mB.run_forever(speed_sp=BASE_SPEED)
         else:
-            print("There is a diff in the sensor readings above the threshold")
+            print("There is a diff in the sensors readings above the threshold")
             TurnForLine(sensorRight, sensorLeft)
             #one might be looking at black	
     
