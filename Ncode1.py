@@ -121,22 +121,6 @@ def rightTurnS():
 
     return
 
-#Ignore this bit, just writing out an idea for something
-def TurnLeftOrRight(LOR):
-    #This will make the inital turn depending on the direction
-    if LOR == 'Left':
-        #Setup for left turn
-        mB.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
-        mB.wait_while('running')
-    else:
-        #Right turn
-        mA.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
-        mA.wait_while('running')
-    #sensorLeftT = colorSensorLeft.value()
-    #sensorRightT = colorSensorRight.value()
-    #Unfinished code here
-    return
-
 def Reverse():
     #First need to reverse a bit
     mA.polarity = "inversed"
@@ -208,15 +192,32 @@ def countLine(sensorFront):
 #----------------------------------------------------------------------------------------------------------------------
 #This bit will decide what direction to take
 
-def WhatToDo():
+switcher = {
+    1: leftTurnS,
+    2: rightTurnS,
+    3: Stops,
+    4: leftTurnS
+}
+    
 
-    return
+
+#def WhatToDo(argument):
+#    switcher = {
+#        1: leftTurnS,
+#        2: leftTurnS,
+#        3: leftTurnS,
+#        4: leftTurnS
+#    }
+#    
+#    return
+
 
 #----------------------------------------------------------------------------------------------------------------------
 #This would be the main bit
 
 def followLinev2():
     global holdBit
+    global intersections
     #Read the sensor value and store it
     sensorLeft = colorSensorLeft.value()
     sensorRight = colorSensorRight.value()
@@ -226,8 +227,7 @@ def followLinev2():
     print("Left: ", sensorLeft, "Right: ", sensorRight, "Front: ", sensorFront)
     print("Number of intersections counted = ", intersections)
 
-    #Could have a bit here that counts the current number of intersections and makes a move based on that
-    #WhatToDo()
+    switcher[intersections]
 
     #Check the front sensor and stop/count it, if a line is detected
     if sensorFront < THRESHOLD_FRONT:
