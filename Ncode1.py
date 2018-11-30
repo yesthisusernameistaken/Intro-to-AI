@@ -28,7 +28,7 @@ import signal
 #Threshold for the sensors, the two color ones and the light
 THRESHOLD_LEFT = 30
 THRESHOLD_RIGHT = 30
-THRESHOLD_FRONT = 400
+THRESHOLD_FRONT = 350
 THRESHOLD_DIF = 20
 
 intersections = 0
@@ -79,6 +79,8 @@ print('Press Ctrl+C to exit')
 
 #90 degree turn to the left, uses sensor for final position
 def leftTurnS():
+    print("Left Turn")
+    Stops()
     #Initial turn to make it most of the way there
     mB.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mB.wait_while('running')
@@ -102,6 +104,8 @@ def leftTurnS():
 
 #90 degree turn to the right, uses sensor for final position
 def rightTurnS():
+    print("Right Turn")
+    Stops()
     #Initial turn to make it most of the way there
     mA.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mA.wait_while('running')
@@ -122,6 +126,8 @@ def rightTurnS():
     return
 
 def Reverse():
+    print("Reverse")
+    Stops()
     #First need to reverse a bit
     mA.polarity = "inversed"
     mB.polarity = "inversed"
@@ -166,6 +172,10 @@ def Stops():
     mA.stop(stop_action="hold")
     mB.stop(stop_action="hold")
     return
+
+def Nothing():
+    print('No intersection counted yet')
+    return
 #----------------------------------------------------------------------------------------------------------------------	
 
 #Turn left and right to keep the line in the center
@@ -192,24 +202,14 @@ def countLine(sensorFront):
 #----------------------------------------------------------------------------------------------------------------------
 #This bit will decide what direction to take
 
-switcher = {
-    1: leftTurnS,
-    2: rightTurnS,
-    3: Stops,
-    4: leftTurnS
-}
-    
-
-
-#def WhatToDo(argument):
-#    switcher = {
-#        1: leftTurnS,
-#        2: leftTurnS,
-#        3: leftTurnS,
-#        4: leftTurnS
-#    }
-#    
-#    return
+def indirect(i):
+        switcher={
+                0: Nothing,
+                1: leftTurnS,
+                2: Stops,
+                3: Stops }
+        func=switcher.get(i, "Invalid")
+        return func()
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -227,13 +227,12 @@ def followLinev2():
     print("Left: ", sensorLeft, "Right: ", sensorRight, "Front: ", sensorFront)
     print("Number of intersections counted = ", intersections)
 
-    switcher[intersections]
-
     #Check the front sensor and stop/count it, if a line is detected
     if sensorFront < THRESHOLD_FRONT:
         #Black line detected by front sensor
         #Stops()
         countLine(sensorFront)
+        indirect(intersections)
     else:
         #Front sensor doesn't see a black line
         holdBit = 0
