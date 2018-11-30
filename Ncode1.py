@@ -7,7 +7,6 @@ import signal
 #This code follows a line and will count the intersections it passes 
 
 #Todo list
-#Find a way of setting a list of steps to take (ie turns)
 #If it needs to use the ensors when reversing will 
 
 #Long term to do
@@ -23,24 +22,27 @@ import signal
 #Might get the bot to stop right after the fully crossed a line OR get turns to reset that bit
 #When it makes a U-turn, might need to get it to backup but only when doing a 180? Yeah looks like it
 #Sheild the sensors from external light 
-
+#Find a way of setting a list of steps to take (ie turns) - dictionary
 
 #Threshold for the sensors, the two color ones and the light
 THRESHOLD_LEFT = 30
 THRESHOLD_RIGHT = 30
-THRESHOLD_FRONT = 350
-THRESHOLD_DIF = 20
+THRESHOLD_FRONT = 450
+THRESHOLD_DIF = 15
 
 intersections = 0
 holdBit = 0
+ReversedBit = 0
 
 #Speeds the motors will use
 BASE_SPEED = 300
 TURN_SPEED = 400
-TURN_SPEED_SENS = 600
-TURN_SPEED_SENS_FINAL = 200
+TURN_SPEED_SENS = 700
+TURN_SPEED_SENS_FINAL = 300
+TURN_SPEED_SENS_U = 300
 
 REVERSE_DIST = 100
+
 
 #----------------------------------------------------------------------------------------------------------------------
 #Initial setup of sensors and motors
@@ -81,8 +83,12 @@ print('Press Ctrl+C to exit')
 def leftTurnS():
     print("Left Turn")
     Stops()
+    mA.polarity = "normal"
+    mB.polarity = "normal"
+    global ReversedBit
+    ReversedBit = 0
     #Initial turn to make it most of the way there
-    mB.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    mB.run_to_rel_pos(position_sp=350, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mB.wait_while('running')
     sensorRightT = colorSensorRight.value()
 
@@ -106,8 +112,12 @@ def leftTurnS():
 def rightTurnS():
     print("Right Turn")
     Stops()
+    mA.polarity = "normal"
+    mB.polarity = "normal"
+    global ReversedBit
+    ReversedBit = 0
     #Initial turn to make it most of the way there
-    mA.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    mA.run_to_rel_pos(position_sp=350, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mA.wait_while('running')
     sensorLeftT = colorSensorLeft.value()
 
@@ -125,32 +135,27 @@ def rightTurnS():
 
     return
 
-def Reverse():
-    print("Reverse")
-    Stops()
+#180 to the right with sensors for final bit
+def UturnSR():
     #First need to reverse a bit
     mA.polarity = "inversed"
     mB.polarity = "inversed"
-    mA.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS, stop_action="hold")
-    mB.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    mA.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS_U, stop_action="hold")
+    mB.run_to_rel_pos(position_sp=REVERSE_DIST, speed_sp=TURN_SPEED_SENS_U, stop_action="hold")
+    mA.wait_while('running')
+    mB.wait_while('running')
     #Set direction back to normal
     mA.polarity = "normal"
     mB.polarity = "normal"
-    return
 
-#180 to the right with sensors for final bit
-def UturnS():
-    #First reverse to clear the can
-    Reverse()
-    mA.run_to_rel_pos(position_sp=380, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    #Now do the turn
+    mA.run_to_rel_pos(position_sp=350, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mB.polarity = "inversed"
-    mB.run_to_rel_pos(position_sp=380, speed_sp=TURN_SPEED_SENS, stop_action="hold")
+    mB.run_to_rel_pos(position_sp=400, speed_sp=TURN_SPEED_SENS, stop_action="hold")
     mA.wait_while('running')
     mB.wait_while('running')
-    #Set the motor back to normal, not sure if needed but to be on the safe side
-    mB.polarity = "normal"
-
     sensorLeftT = colorSensorLeft.value()
+    sensorRightT = colorSensorRight.value()
     
     if sensorLeftT < THRESHOLD_LEFT:
         print('Line seen right from the start')
@@ -164,8 +169,19 @@ def UturnS():
             sensorLeftT = colorSensorLeft.value()
             print("Left sensor value: ", sensorLeftT)
 
+    mA.polarity = "normal"
+    mB.polarity = "normal"
+
     return
 
+def ReverseM():
+    print("Reversing following the line")
+    global ReversedBit
+    ReversedBit = 1
+    #Reverse motors
+    mA.polarity = "inversed"
+    mB.polarity = "inversed"
+    return
 
 def Stops():
     print('Stop motors')
@@ -205,9 +221,27 @@ def countLine(sensorFront):
 def indirect(i):
         switcher={
                 0: Nothing,
-                1: leftTurnS,
-                2: Stops,
-                3: Stops }
+                1: ReverseM,
+                2: Nothing,
+                3: ReverseM,
+                4: leftTurnS,
+                5: leftTurnS,
+                6: leftTurnS,
+                7: Nothing,
+                8: UturnSR,
+                9: Nothing,
+                10: Nothing, 
+                11: Nothing,
+                12: leftTurnS,
+                13: leftTurnS,
+                14: leftTurnS,
+                15: leftTurnS,
+                16: leftTurnS,
+                17: leftTurnS,
+                18: leftTurnS,
+                19: leftTurnS,
+                20: leftTurnS,
+                21: UturnSR  }
         func=switcher.get(i, "Invalid")
         return func()
 
@@ -230,7 +264,6 @@ def followLinev2():
     #Check the front sensor and stop/count it, if a line is detected
     if sensorFront < THRESHOLD_FRONT:
         #Black line detected by front sensor
-        #Stops()
         countLine(sensorFront)
         indirect(intersections)
     else:
@@ -253,7 +286,52 @@ def followLinev2():
 
     return
 
+def followLinev3():
+    global holdBit
+    global intersections
+    global ReversedBit
+
+    print("-------------------------------------------------------------------------------------------")
+    sensorFront = lightSensorFront.value()
+    
+    if ReversedBit == 0:
+        #Normal operation forward
+        sensorLeft = colorSensorLeft.value()
+        sensorRight = colorSensorRight.value()
+        print("Left: ", sensorLeft, "Right: ", sensorRight, "Front: ", sensorFront)	
+    else:
+        #Reversed sensor
+        sensorLeft = colorSensorRight.value()
+        sensorRight = colorSensorLeft.value()
+        print("Left: ", sensorLeft, "Right: ", sensorRight, "Front: ", sensorFront)
+
+    print("Number of intersections counted = ", intersections)
+
+    #Check the front sensor and stop/count it, if a line is detected
+    if sensorFront < THRESHOLD_FRONT:
+        #Black line detected by front sensor
+        countLine(sensorFront)
+        indirect(intersections)
+    else:
+        #Front sensor doesn't see a black line
+        holdBit = 0
+        #Get the difference between the two sensors
+        sensorDif = sensorLeft-sensorRight
+        sensorDif = abs(sensorDif)
+        print("Sensor difference: ", sensorDif)
+
+        if sensorDif < THRESHOLD_DIF:
+            print("Go ahead, difference is sensors is below threshold")
+            mA.run_forever(speed_sp=BASE_SPEED)
+            mB.run_forever(speed_sp=BASE_SPEED)
+        else:
+            print("There is a diff in the sensors readings above the threshold")
+            TurnForLine(sensorRight, sensorLeft)
+            #one might be looking at black	
+    
+
+    return
 
 #This is the main loop that will keep going forever
 while True :
-    followLinev2()
+    followLinev3()
