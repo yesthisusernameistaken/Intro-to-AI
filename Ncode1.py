@@ -28,22 +28,31 @@ import signal
 #Threshold for the sensors, the two color ones and the light
 THRESHOLD_LEFT = 25
 THRESHOLD_RIGHT = 25
-THRESHOLD_FRONT = 450
+THRESHOLD_FRONT = 460
 THRESHOLD_DIF = 15
 
-intersections = 0
+intersections = 1
 holdBit = 0
 ReversedBit = 0
+LineSensTimes = 0
 
 #Speeds the motors will use
-BASE_SPEED = 100
-TURN_SPEED = 400
-TURN_SPEED_SENS = 700
+BASE_SPEED = 300
+TURN_SPEED = 500
+
+BASE_SPEED_2 = 200
+TURN_SPEED_2 = 400
+BASE_SPEED_3 = 50
+TURN_SPEED_3 = 400
+
+
+
+TURN_SPEED_SENS = 900
 TURN_SPEED_SENS_FINAL = 300
 TURN_SPEED_SENS_U = 300
-BASE_SPEED_FORW = 500
+BASE_SPEED_FORW = 300
 
-REVERSE_DIST = 100
+REVERSE_DIST = 150
 
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -198,15 +207,18 @@ def Nothing():
 
 #Turn left and right to keep the line in the center
 def TurnForLine(sensorRight, sensorLeft):
- if sensorRight < sensorLeft:
-     print("Turn right")
-     mA.run_forever(speed_sp=TURN_SPEED)
-     mB.run_forever(speed_sp=BASE_SPEED)
- else:
-     print("Turn left")
-     mA.run_forever(speed_sp=BASE_SPEED)
-     mB.run_forever(speed_sp=TURN_SPEED)
- return
+    global LineSensTimes
+    if sensorRight < sensorLeft:
+        print("Turn right")
+        mA.run_forever(speed_sp=TURN_SPEED)
+        mB.run_forever(speed_sp=BASE_SPEED)
+     
+    else:
+        print("Turn left")
+        mA.run_forever(speed_sp=BASE_SPEED)
+        mB.run_forever(speed_sp=TURN_SPEED)
+
+    return
 
 def TurnForLineReverse(sensorRight, sensorLeft):
  if sensorRight < sensorLeft:
@@ -232,158 +244,160 @@ def countLine(sensorFront):
 
 def indirect(i):
         switcher={
-            0 : Nothing ,
-            1 : rightTurnS ,
-            2 : Nothing ,
-            3 : Nothing ,
-            4 : Nothing ,
-            5 : rightTurnS ,
-            6 : Nothing ,
-            7 : Nothing ,
-            8 : Nothing ,
-            9 : rightTurnS ,
-            10 : Nothing ,
-            11 : Nothing ,
-            12 : UturnSR ,
-            13 : leftTurnS ,
-            14 : leftTurnS ,
-            15 : Nothing ,
-            16 : Nothing ,
-            17 : Nothing ,
-            18 : UturnSR ,
-            19 : leftTurnS ,
-            20 : leftTurnS ,
-            21 : Nothing ,
-            22 : Nothing ,
-            23 : Nothing ,
-            24 : UturnSR ,
-            25 : leftTurnS ,
-            26 : leftTurnS ,
-            27 : Nothing ,
-            28 : UturnSR ,
-            29 : Nothing ,
-            30 : Nothing ,
-            31 : rightTurnS ,
-            32 : Nothing ,
-            33 : Nothing ,
-            34 : rightTurnS ,
-            35 : Nothing ,
-            36 : Nothing ,
-            37 : leftTurnS ,
-            38 : Nothing ,
-            39 : leftTurnS ,
-            40 : leftTurnS ,
-            41 : Nothing ,
-            42 : UturnSR ,
-            43 : rightTurnS ,
-            44 : rightTurnS ,
-            45 : Nothing ,
-            46 : Nothing ,
-            47 : UturnSR ,
-            48 : leftTurnS ,
-            49 : leftTurnS ,
-            50 : Nothing ,
-            51 : Nothing ,
-            52 : Nothing ,
-            53 : UturnSR ,
-            54 : leftTurnS ,
-            55 : leftTurnS ,
-            56 : Nothing ,
-            57 : UturnSR ,
-            58 : rightTurnS ,
-            59 : rightTurnS ,
-            60 : Nothing ,
-            61 : UturnSR ,
-            62 : leftTurnS ,
-            63 : leftTurnS ,
-            64 : Nothing ,
-            65 : Nothing ,
-            66 : UturnSR ,
-            67 : Nothing ,
-            68 : rightTurnS ,
-            69 : Nothing ,
-            70 : Nothing ,
-            71 : Nothing ,
-            72 : Nothing ,
-            73 : rightTurnS ,
-            74 : Nothing ,
-            75 : Nothing ,
-            76 : leftTurnS ,
-            77 : Nothing ,
-            78 : Nothing ,
-            79 : leftTurnS ,
-            80 : Nothing ,
-            81 : Nothing ,
-            82 : Nothing ,
-            83 : leftTurnS ,
-            84 : leftTurnS ,
-            85 : Nothing ,
-            86 : UturnSR ,
-            87 : rightTurnS ,
-            88 : Nothing ,
-            89 : rightTurnS ,
-            90 : Nothing ,
-            91 : Nothing ,
-            92 : Nothing ,
-            93 : UturnSR ,
-            94 : rightTurnS ,
-            95 : rightTurnS ,
-            96 : Nothing ,
-            97 : Nothing ,
-            98 : UturnSR ,
-            99 : leftTurnS ,
-            100 : leftTurnS ,
-            101 : Nothing ,
-            102 : Nothing ,
-            103 : Nothing ,
-            104 : UturnSR ,
-            105 : rightTurnS ,
-            106 : rightTurnS ,
-            107 : Nothing ,
-            108 : UturnSR ,
-            109 : rightTurnS ,
-            110 : rightTurnS ,
-            111 : Nothing ,
-            112 : UturnSR ,
-            113 : leftTurnS ,
-            114 : Nothing ,
-            115 : Nothing ,
-            116 : Nothing ,
-            117 : rightTurnS ,
-            118 : Nothing ,
-            119 : leftTurnS ,
-            120 : Nothing ,
-            121 : Nothing ,
-            122 : leftTurnS ,
-            123 : Nothing ,
-            124 : leftTurnS ,
-            125 : leftTurnS ,
-            126 : Nothing ,
-            127 : UturnSR ,
-            128 : rightTurnS ,
-            129 : rightTurnS ,
-            130 : Nothing ,
-            131 : Nothing ,
-            132 : Nothing ,
-            133 : UturnSR ,
-            134 : rightTurnS ,
-            135 : rightTurnS ,
-            136 : Nothing ,
-            137 : rightTurnS ,
-            138 : leftTurnS ,
-            139 : leftTurnS ,
-            140 : Nothing ,
-            141 : Nothing ,
-            142 : leftTurnS ,
-            143 : rightTurnS ,
-            144 : Nothing ,
-            145 : rightTurnS ,
-            146 : Nothing ,
-            147 : rightTurnS ,
-            148 : rightTurnS ,
-            149 : rightTurnS ,
-            150 : leftTurnS ,
-            151 : leftTurnS, }
+            1:Nothing,
+            2:rightTurnS,
+            3:Nothing,
+            4:Nothing,
+            5:Nothing,
+            6:rightTurnS,
+            7:Nothing,
+            8:Nothing,
+            9:Nothing,
+            10:rightTurnS,
+            11:Nothing,
+            12:UturnSR,
+            13:leftTurnS,
+            14:leftTurnS,
+            15:leftTurnS,
+            16:Nothing,
+            17:Nothing,
+            18:UturnSR,
+            19:leftTurnS,
+            20:leftTurnS,
+            21:leftTurnS,
+            22:Nothing,
+            23:Nothing,
+            24:UturnSR,
+            25:leftTurnS,
+            26:leftTurnS,
+            27:leftTurnS,
+            28:UturnSR,
+            29:rightTurnS,
+            30:Nothing,
+            31:Nothing,
+            32:rightTurnS,
+            33:Nothing,
+            34:Nothing,
+            35:rightTurnS,
+            36:Nothing,
+            37:Nothing,
+            38:leftTurnS,
+            39:Nothing,
+            40:leftTurnS,
+            41:leftTurnS,
+            42:UturnSR,
+            43:rightTurnS,
+            44:rightTurnS,
+            45:rightTurnS,
+            46:Nothing,
+            47:UturnSR,
+            48:leftTurnS,
+            49:leftTurnS,
+            50:leftTurnS,
+            51:Nothing,
+            52:Nothing,
+            53:UturnSR,
+            54:leftTurnS,
+            55:leftTurnS,
+            56:leftTurnS,
+            57:UturnSR,
+            58:rightTurnS,
+            59:rightTurnS,
+            60:rightTurnS,
+            61:UturnSR,
+            62:leftTurnS,
+            63:leftTurnS,
+            64:leftTurnS,
+            65:Nothing,
+            66:UturnSR,
+            67:Nothing,
+            68:Nothing,
+            69:rightTurnS,
+            70:Nothing,
+            71:Nothing,
+            72:Nothing,
+            73:Nothing,
+            74:rightTurnS,
+            75:Nothing,
+            76:Nothing,
+            77:leftTurnS,
+            78:Nothing,
+            79:Nothing,
+            80:leftTurnS,
+            81:Nothing,
+            82:Nothing,
+            83:Nothing,
+            84:leftTurnS,
+            85:leftTurnS,
+            86:UturnSR,
+            87:rightTurnS,
+            88:rightTurnS,
+            89:Nothing,
+            90:rightTurnS,
+            91:Nothing,
+            92:Nothing,
+            93:UturnSR,
+            94:rightTurnS,
+            95:rightTurnS,
+            96:rightTurnS,
+            97:Nothing,
+            98:UturnSR,
+            99:leftTurnS,
+            100:leftTurnS,
+            101:leftTurnS,
+            102:Nothing,
+            103:Nothing,
+            104:UturnSR,
+            105:rightTurnS,
+            106:rightTurnS,
+            107:rightTurnS,
+            108:UturnSR,
+            109:rightTurnS,
+            110:rightTurnS,
+            111:rightTurnS,
+            112:UturnSR,
+            113:leftTurnS,
+            114:leftTurnS,
+            115:Nothing,
+            116:Nothing,
+            117:Nothing,
+            118:rightTurnS,
+            119:Nothing,
+            120:leftTurnS,
+            121:Nothing,
+            122:Nothing,
+            123:leftTurnS,
+            124:Nothing,
+            125:leftTurnS,
+            126:leftTurnS,
+            127:leftTurnS,
+            128:rightTurnS,
+            129:rightTurnS,
+            130:Nothing,
+            131:Nothing,
+            132:UturnSR,
+            133:rightTurnS,
+            134:rightTurnS,
+            135:rightTurnS,
+            136:Nothing,
+            137:UturnSR,
+            138:leftTurnS,
+            139:leftTurnS,
+            140:leftTurnS,
+            141:Nothing,
+            142:Nothing,
+            143:UturnSR,
+            144:rightTurnS,
+            145:rightTurnS,
+            146:Nothing,
+            147:rightTurnS,
+            148:Nothing,
+            149:rightTurnS,
+            150:rightTurnS,
+            151:rightTurnS,
+            152:leftTurnS,
+            153:leftTurnS,
+            154:UturnSR }
         func=switcher.get(i, "Invalid")
         return func()
 
@@ -395,6 +409,7 @@ def followLinev3():
     global holdBit
     global intersections
     global ReversedBit
+    global LineSensTimes
     print ("Reversed bit:", ReversedBit)
     print("-------------------------------------------------------------------------------------------")
     sensorFront = lightSensorFront.value()
@@ -420,9 +435,11 @@ def followLinev3():
     if sensorFront < THRESHOLD_FRONT:
         #Black line detected by front sensor
         holdBit = holdBit+1
-        countLine(sensorFront)
+        #countLine(sensorFront)
+        if holdBit == 1:
+            intersections = intersections+1
         indirect(intersections)
-        
+
     else:
         #Front sensor doesn't see a black line
         holdBit = 0
@@ -435,8 +452,10 @@ def followLinev3():
             print("Go ahead, difference is sensors is below threshold")
             mA.run_forever(speed_sp=BASE_SPEED_FORW)
             mB.run_forever(speed_sp=BASE_SPEED_FORW)
+            LineSensTimes = 0
         else:
             print("There is a diff in the sensors readings above the threshold")
+            LineSensTimes = LineSensTimes + 1
             if ReversedBit == 0:
                 #Normal operation
                 TurnForLine(sensorRight, sensorLeft)
